@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoplite Elo Leaderboard</title>
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body { background-color: #111827; color: #f3f4f6; font-family: sans-serif; }
+    </style>
+</head>
+<body class="p-6 max-w-4xl mx-auto">
+
+<header class="flex justify-between items-center my-8 bg-gray-900/50 p-4 rounded-xl border border-gray-800 gap-6">
+    <div class="text-left flex-1">
+        <h1 class="text-4xl font-extrabold text-amber-500 tracking-wide uppercase">Hoplite Leaderboard</h1>
+        <p class="text-gray-400 mt-2">Le classement général Elo mis à jour en temps réel</p>
+    </div>
+    <div class="flex items-center gap-6">
+        <!-- Barre de recherche magique -->
+        <input id="search-player" type="text" oninput="searchPlayer()" placeholder="🔍 Rechercher un joueur..." class="p-2 w-64 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:border-amber-500 shadow-inner">
+        <img src="/logo.jpg" alt="Hoplite Logo" class="h-20 w-auto object-contain">
+    </div>
+</header>
+
+    <!-- Tableau des scores -->
+    <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700 mb-12">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-900 text-amber-400 uppercase text-sm tracking-wider">
+                    <th class="p-4 w-24 text-center">Rang</th>
+                    <th class="p-4">Pseudo</th>
+                    <th class="p-4 text-right">Points Elo</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <!-- Les 1500 lignes vont s'insérer ici via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Charger et afficher le classement
+        async function loadLeaderboard() {
+            const res = await fetch('/api/leaderboard');
+            const joueurs = await res.json();
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+
+            joueurs.forEach((joueur, index) => {
+                const rang = index + 1;
+                let badgeColor = "text-gray-400";
+                if(rang === 1) badgeColor = "text-yellow-400 font-bold text-lg";
+                if(rang === 2) badgeColor = "text-slate-300 font-bold";
+                if(rang === 3) badgeColor = "text-amber-600 font-bold";
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-gray-700 hover:bg-gray-700/50 transition">
+                        <td class="p-4 text-center ${badgeColor}">#${rang}</td>
+                        <td class="p-4 font-medium flex items-center gap-3">
+                            <img src="https://mc-heads.net{joueur.pseudo}/24" alt="skin" class="rounded w-6 h-6 bg-gray-700">
+                            <span class="player-name-text">${joueur.pseudo}</span>
+                        </td>
+                        <td class="p-4 text-right text-amber-500 font-mono font-bold">${joueur.elo}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Fonction pour filtrer le tableau en temps réel (mise à jour pour la nouvelle structure)
+        function searchPlayer() {
+            const input = document.getElementById('search-player').value.toLowerCase();
+            const rows = document.getElementById('leaderboard-body').getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                const nameSpan = rows[i].querySelector('.player-name-text');
+                if (nameSpan) {
+                    const pseudoText = nameSpan.textContent || nameSpan.innerText;
+                    if (pseudoText.toLowerCase().indexOf(input) > -1) {
+                        rows[i].style.display = "";
+                    } else {
+                        rows[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        loadLeaderboard();
+    </script>
+</body>
+</html>
