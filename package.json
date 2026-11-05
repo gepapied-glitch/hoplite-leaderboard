@@ -1,0 +1,12 @@
+{
+  "name": "hoplite-leaderboard",
+  "version": "1.0.0",
+  "description": "Leaderboard pour Hoplite",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
